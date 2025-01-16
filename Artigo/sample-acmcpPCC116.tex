@@ -1,0 +1,711 @@
+%%
+%% This is file `sample-acmcp.tex',
+%% generated with the docstrip utility.
+%%
+%% The original source files were:
+%%
+%% samples.dtx  (with options: `all,journal,acmcp')
+%% 
+%% IMPORTANT NOTICE:
+%% 
+%% For the copyright see the source file.
+%% 
+%% Any modified versions of this file must be renamed
+%% with new filenames distinct from sample-acmcp.tex.
+%% 
+%% For distribution of the original source see the terms
+%% for copying and modification in the file samples.dtx.
+%% 
+%% This generated file may be distributed as long as the
+%% original source files, as listed above, are part of the
+%% same distribution. (The sources need not necessarily be
+%% in the same archive or directory.)
+%%
+%%
+%% Commands for TeXCount
+%TC:macro \cite [option:text,text]
+%TC:macro \citep [option:text,text]
+%TC:macro \citet [option:text,text]
+%TC:envir table 0 1
+%TC:envir table* 0 1
+%TC:envir tabular [ignore] word
+%TC:envir displaymath 0 word
+%TC:envir math 0 word
+%TC:envir comment 0 0
+%%
+%%
+%% The first command in your LaTeX source must be the \documentclass
+%% command.
+%%
+%% For submission and review of your manuscript please change the
+%% command to \documentclass[manuscript, screen, review]{acmart}.
+%%
+%% When submitting camera ready or to TAPS, please change the command
+%% to \documentclass[sigconf]{acmart} or whichever template is required
+%% for your publication.
+%%
+%%
+\documentclass[sigconf]{acmart}
+
+%%
+%% \BibTeX command to typeset BibTeX logo in the docs
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    Bib\TeX}}}
+
+%% Rights management information.  This information is sent to you
+%% when you complete the rights form.  These commands have SAMPLE
+%% values in them; it is your responsibility as an author to replace
+%% the commands and values with those provided to you when you
+%% complete the rights form.
+\setcopyright{acmlicensed}
+\copyrightyear{2018}
+\acmYear{2018}
+\acmDOI{XXXXXXX.XXXXXXX}
+
+
+%%
+%% These commands are for a JOURNAL article.
+\acmJournal{JDS}
+\acmVolume{37}
+\acmNumber{4}
+\acmArticle{111}
+\acmMonth{8}
+
+%%
+%% Submission ID.
+%% Use this when submitting an article to a sponsored event. You'll
+%% receive a unique submission ID from the organizers
+%% of the event, and this ID should be used as the parameter to this command.
+%%\acmSubmissionID{123-A56-BU3}
+
+
+
+
+%%
+%% end of the preamble, start of the body of the document source.
+\begin{document}
+
+
+%%
+%% The "title" command has an optional parameter,
+%% allowing the author to define a "short title" to be used in page headers.
+\title{Towards an Executable Formal Specification for EBPF}
+
+%%
+%% The "author" command and its associated commands are used to define
+%% the authors and their affiliations.
+%% Of note is the shared affiliation of the first two authors, and the
+%% "authornote" and "authornotemark" commands
+%% used to denote shared contribution to the research.
+\author{Marcos Geraldo Braga Emiliano}
+\email{marcos.emiliano@aluno.ufop.edu.br}
+\affiliation{%
+  \institution{Universidade Federal de Ouro Preto}
+  %\streetaddress{P.O. Box 1212}
+  \city{Ouro Preto}
+  \state{Minas Gerais}
+  \country{Brazil}
+  %\postcode{43017-6221}
+}
+\author{Rodrigo Ribeiro}
+\email{rodrigo.ribeiro@ufop.edu.br}
+\affiliation{%
+  \institution{Universidade Federal de Ouro Preto}
+  %\streetaddress{P.O. Box 1212}
+  \city{Ouro Preto}
+  \state{Minas Gerais}
+  \country{Brazil}
+  %\postcode{43017-6221}
+}
+\author{Elton Máximo Cardoso}
+\email{elton.cardoso@aluno.ufop.edu.br}
+\affiliation{%
+  \institution{Universidade Federal de Ouro Preto}
+  %\streetaddress{P.O. Box 1212}
+  \city{Ouro Preto}
+  \state{Minas Gerais}
+  \country{Brazil}
+  %\postcode{43017-6221}
+}
+\author{Leonardo Vieira dos Santos Reis}
+\email{lvsreis@ufjf.edu.br}
+\affiliation{%
+  \institution{Universidade Federal de Juiz de Fora}
+  %\streetaddress{P.O. Box 1212}
+  \city{Juiz de Fora}
+  \state{Minas Gerais}
+  \country{Brazil}
+  %\postcode{43017-6221}
+}
+
+%%
+%% By default, the full list of authors will be used in the page
+%% headers. Often, this list is too long, and will overlap
+%% other information printed in the page headers. This command allows
+%% the author to define a more concise list
+%% of authors' names for this purpose.
+\renewcommand{\shortauthors}{Trovato et al.}
+%%
+%% Article type: Research, Review, Discussion, Invited or position
+\acmArticleType{Review}
+%%
+%% Links to code and data
+\acmCodeLink{https://github.com/borisveytsman/acmart}
+\acmDataLink{htps://zenodo.org/link}
+%%
+%% Authors' contribution
+\acmContributions{BT and GKMT designed the study; LT, VB, and AP
+  conducted the experiments, BR, HC, CP and JS analyzed the results,
+  JPK developed analytical predictions, all authors participated in
+  writing the manuscript.}
+%%
+%% Sometimes the addresses are too long to fit on the page.  In this
+%% case uncomment the lines below and fill them accodingly.
+%%
+%% \authorsaddresses{Corresponding author: Ben Trovato,
+%% \href{mailto:trovato@corporation.com}{trovato@corporation.com};
+%% Institute for Clarity in Documentation, P.O. Box 1212, Dublin,
+%% Ohio, USA, 43017-6221}
+%%
+%%
+%% Keywords. The author(s) should pick words that accurately describe
+%% the work being presented. Separate the keywords with commas.
+\keywords{Do, Not, Us, This, Code, Put, the, Correct, Terms, for,
+  Your, Paper}
+
+\maketitle
+
+\section{Introduction}
+
+Os sistemas operacionais modernos implementam a maior parte de suas funcionalidades por meio de extensões carregadas dinamicamente, que fornecem suporte para dispositivos de E/S, sistemas de arquivos, redes, entre outros. Essas extensões são executadas no modo privilegiado da CPU e, portanto, devem ser verificadas para garantir a ausência de código malicioso.
+
+Tradicionalmente, a validação dessas extensões é realizada por meio de testes para eliminar bugs. Além disso, em alguns casos, ferramentas de verificação formal são utilizadas para aumentar a segurança \cite{ball2006thorough} \cite{lal2014powering}. Embora sejam eficazes na identificação de bugs, essas ferramentas não garantem a correção completa do código.
+
+As extensões do kernel representam um tipo especial de aplicação que se origina de fontes não confiáveis e, portanto, não podem ser consideradas seguras. Essas extensões permitem que aplicativos personalizem o kernel com algoritmos específicos para processamento de pacotes \cite{Express}, políticas de segurança \cite{Seccomp}, profiling \cite{Visor} e até mesmo modificações nos subsistemas principais do kernel \cite{amit2017hypercallbacks}.
+
+Historicamente, sistemas operacionais utilizaram técnicas como sandboxing para a execução de extensões não confiáveis dentro do kernel. Outras abordagens incluíram o uso de linguagens de domínio específico \cite{bershad1995extensibility} \cite{fahndrich2006language} e interpretadores de bytecode \cite{mccanne1993bsd}. No entanto, essas abordagens mostraram-se restritivas em casos onde o desempenho é um fator crítico. Para mitigar essas limitações, o Linux adotou uma abordagem baseada no uso de um verificador de código, conhecido como Extended Berkeley Packet Filters (eBPF).
+
+Programas eBPF consistem em bytecodes simples que são compilados em instruções nativas da CPU quando carregados pelo kernel. Ao contrário dos bytecodes da Java Virtual Machine, o compilador e o runtime de eBPF não impõem restrições de tipo. A validade dos programas eBPF é garantida por um verificador estático que impede que programas acessem estruturas de dados arbitrárias do kernel.
+
+Atualmente, os programadores eBPF enfrentam quatro grandes desafios. Primeiro, o verificador de eBPF apresenta uma alta taxa de falsos positivos, rejeitando como inseguros programas que não oferecem risco algum ao kernel. Essa limitação obriga os desenvolvedores a reescreverem seu código para que ele seja aceito pelo verificador, muitas vezes envolvendo a inserção de acessos e verificações redundantes. Segundo, o algoritmo utilizado pelo verificador é sensível ao número de caminhos presentes no programa analisado. Terceiro, o verificador impõe a séria restrição de que programas não devem conter loops. Finalmente, o verificador atual não é especificado formalmente, o que dificulta a predição de quando um código será aceito.
+
+Diante desses desafios, este projeto pretende especificar formalmente um verificador de programas eBPF para solucionar as limitações identificadas. Para isso, serão utilizadas técnicas bem estabelecidas no campo de projeto de linguagens de programação \cite{pierce2002types} \cite{felleisen2009semantics}.
+
+Do ponto de vista científico, até onde sabemos, não há uma implementação de eBPF que:
+\begin{itemize}
+\item[1] possua uma especificação formal e comportamento bem definido; e
+\item[2] suporte programas contendo loops.
+\end{itemize}
+
+Essas limitações complicam desnecessariamente o desenvolvimento de aplicações utilizando eBPF. Nesse sentido, o presente projeto visa especificar formalmente um verificador de programas eBPF que possua um comportamento bem definido e suporte o desenvolvimento de programas contendo loops.
+
+Do ponto de vista tecnológico, o uso de ferramentas que facilitem a construção de aplicações de rede usando eBPF é de grande importância. Atualmente, programas eBPF são escritos em linguagem C e compilados para bytecode usando LLVM \cite{ebpf}. No entanto, o compilador LLVM não é formalmente verificado. Dessa forma, a validação de programas ainda é realizada pelo verificador, que possui todas as limitações mencionadas anteriormente.
+
+Portanto, este trabalho justifica-se pelo desenvolvimento de novas técnicas para verificação de segurança de aplicações de monitoramento e seleção de pacotes de rede expressas utilizando eBPF.
+
+A utilização da linguagem de programação Lean 4 surge como uma solução promissora para formalizar a linguagem eBPF. Lean 4 é uma linguagem de programação dependente de tipos, desenvolvida para auxiliar na formalização de sistemas complexos e na verificação de teoremas. Segundo de Moura et al. (2015), Lean 4 "proporciona uma base sólida para a definição formal e verificação de propriedades matemáticas", tornando-a uma escolha ideal para o desenvolvimento de um verificador formal de eBPF \cite{de2015lean}.
+
+Ao formalizar a linguagem eBPF utilizando Lean 4, é possível definir com precisão a semântica operacional do bytecode eBPF, bem como as regras de verificação que garantem a segurança dos programas. Conforme relatado por Nowak et al. (2010), a formalização começa com a especificação da sintaxe e das regras de tipagem da linguagem, seguida pela definição da semântica operacional, que descreve como os programas eBPF são executados pelo kernel \cite{page2005engineering}. Uma vez que essas fundações estejam estabelecidas, podemos desenvolver provas formais que garantam que os programas verificados são seguros e não acessam estruturas de dados arbitrárias do kernel.
+
+A principal vantagem de usar Lean 4 neste contexto é a capacidade de construir provas de correção diretamente ligadas à definição formal da linguagem eBPF. Com Lean 4, "é possível não apenas especificar as propriedades desejadas dos programas eBPF, mas também automatizar a verificação dessas propriedades, fornecendo uma garantia matemática da segurança do código" \cite{de2015lean}. Isso elimina a necessidade de confiar exclusivamente em testes ou em verificadores que podem produzir falsos positivos.
+
+Além disso, Lean 4 facilita a modificação e extensão da linguagem eBPF. Novas instruções ou extensões da linguagem podem ser formalmente adicionadas ao sistema, e suas propriedades podem ser verificadas no mesmo ambiente formal. Isso proporciona uma flexibilidade e uma robustez significativas para a evolução contínua da linguagem eBPF.
+
+Os resultados esperados desse projeto incluem não apenas a criação de um verificador formal para eBPF, mas também a construção de um corpo de conhecimento formal que pode ser utilizado pela comunidade para futuras pesquisas e desenvolvimento. A formalização em Lean 4 permitirá a verificação de novos aspectos da segurança do kernel, contribuindo para a construção de sistemas operacionais mais seguros e confiáveis.
+
+Portanto, o uso de Lean 4 para formalizar a linguagem eBPF não só aprimora a segurança e confiabilidade das extensões do kernel, como também estabelece uma base sólida para futuras inovações e melhorias na verificação de código de baixo nível.
+
+\section{eBPF}
+
+Os sistemas operacionais modernos obtêm grande parte de sua funcionalidade por meio de extensões carregadas dinamicamente, que implementam suporte para dispositivos de I/O, sistemas de arquivos, redes, entre outros. Essas extensões são executadas no modo privilegiado da CPU, o que requer alta confiabilidade para evitar a introdução de código inseguro ou malicioso. Tradicionalmente, essa confiança é estabelecida através de testes rigorosos para eliminar bugs e da assinatura digital para evitar adulterações. Ferramentas de verificação formal também são ocasionalmente utilizadas para garantir um nível mais robusto de correção \cite{gurfinkel2015seahorn} \cite{ball2006thorough}. Embora eficazes na detecção de bugs, essas ferramentas não oferecem garantias substanciais de correção.
+
+Extensões de kernel não confiáveis representam uma categoria específica dessas extensões, originadas de fontes não confiáveis e, portanto, não podem ser consideradas seguras, mesmo com base no melhor esforço. Tais extensões podem ser instaladas por usuários não privilegiados ou conter código não testado, permitindo que aplicações personalizem o kernel com processamento específico de pacotes, políticas de segurança, instalação de sondas de perfil, monitoramento, depuração, e até mesmo modificações na interação entre subsistemas essenciais do kernel e a aplicação.
+
+O Extended Berkeley Packet Filter (eBPF) é um subsistema do Linux que permite a execução segura de extensões definidas pelo usuário, mesmo que não confiáveis, dentro do kernel. O eBPF utiliza análise estática para proteger o kernel contra extensões defeituosas ou maliciosas. Com a evolução do ecossistema eBPF para suportar extensões mais complexas e diversas, surgiram limitações significativas no verificador atual, incluindo uma alta taxa de falsos positivos, baixa escalabilidade e falta de suporte para loops, o que se tornou um grande obstáculo para os desenvolvedores.
+
+Para superar essas deficiências, o Linux adotou recentemente uma abordagem alternativa baseada em verificação automática \cite{schulist2018linux}. A nova tecnologia, chamada Extended Berkeley Packet Filters (eBPF), é construída em torno de um bytecode simples que é compilado para instruções nativas da CPU quando a extensão é carregada no kernel. Diferentemente de bytecodes tradicionais, como o bytecode Java, o compilador e o tempo de execução do eBPF não impõem segurança de tipo ou de memória. Em vez disso, a segurança é garantida por um verificador estático que assegura que o programa não possa acessar estruturas de dados arbitrárias do kernel ou causar falhas de página.
+
+O verificador eBPF do Linux implementa um algoritmo que rastreia o estado do programa usando máscaras de bits, valores mínimos e máximos possíveis e classes de equivalência de valores por meio de rastreamento de identidade. O conteúdo da pilha é rastreado em casos específicos, e todos os caminhos do programa são enumerados, evitando heuristicamente sufixos cuja segurança já foi implicada por caminhos anteriormente vistos. Embora essa abordagem seja adequada para programas eBPF mais simples (com poucas instruções, código linear sem loops complexos e sem aritmética de ponteiros), ela tem se mostrado um grande obstáculo à medida que novos e mais complexos casos de uso são introduzidos.
+
+Conforme descrito na documentação em \cite{Cilium}, segue a descrição da arquitetura do eBPF.
+
+O BPF (Berkeley Packet Filter) não se define apenas por fornecer seu conjunto de instruções, mas também por oferecer uma infraestrutura adicional ao seu redor, como mapas que atuam como armazenamentos eficientes de chave/valor, funções auxiliares para interagir com e aproveitar funcionalidades do kernel, chamadas de retorno (tail calls) para chamar outros programas BPF, primitivas de reforço de segurança, um sistema de arquivos pseudo para fixação de objetos (mapas, programas), e infraestrutura para permitir que o BPF seja descarregado, por exemplo, para uma placa de rede.
+
+O BPF é um conjunto de instruções RISC de propósito geral e foi originalmente projetado para escrever programas em um subconjunto de C que pode ser compilado em instruções BPF através de um back end de compilador (por exemplo, LLVM), de modo que o kernel possa posteriormente mapeá-los através de um compilador JIT interno para códigos de operação nativos, visando um desempenho de execução ideal dentro do kernel.
+
+As vantagens de inserir essas instruções no kernel incluem:
+\begin{itemize}
+\item Tornar o kernel programável sem a necessidade de cruzar os limites entre o espaço do kernel e o espaço do usuário. Por exemplo, programas BPF relacionados à rede, como no caso do Cilium, podem implementar políticas flexíveis de contêiner, balanceamento de carga e outros meios sem ter que mover pacotes para o espaço do usuário e de volta ao kernel. O estado entre programas BPF e o espaço do kernel/usuário ainda pode ser compartilhado através de mapas sempre que necessário.
+\item Dada a flexibilidade de um caminho de dados programável, os programas podem ser fortemente otimizados para desempenho, também compilando recursos que não são necessários para os casos de uso que o programa resolve. Por exemplo, se um contêiner não requer IPv4, o programa BPF pode ser construído para lidar apenas com IPv6 a fim de economizar recursos no caminho rápido.
+\item No caso de rede (por exemplo, tc e XDP), os programas BPF podem ser atualizados atomicamente sem a necessidade de reiniciar o kernel, serviços do sistema ou contêineres, e sem interrupções de tráfego. Além disso, qualquer estado do programa também pode ser mantido durante as atualizações via mapas BPF.
+\item O BPF fornece uma ABI estável em relação ao espaço do usuário e não requer nenhum módulo de kernel de terceiros. O BPF é uma parte central do kernel Linux que é distribuída em todos os lugares, garantindo que programas BPF existentes continuem funcionando com versões mais novas do kernel. Essa garantia é a mesma que o kernel oferece para chamadas de sistema em relação a aplicativos de espaço do usuário. Além disso, os programas BPF são portáveis entre diferentes arquiteturas.
+\item Os programas BPF trabalham em conjunto com o kernel, utilizando a infraestrutura existente do kernel (por exemplo, drivers, dispositivos de rede, túneis, pilha de protocolos, sockets) e ferramentas (por exemplo, iproute2), bem como as garantias de segurança que o kernel fornece. Ao contrário dos módulos de kernel, os programas BPF são verificados por um verificador interno do kernel para garantir que não possam causar falhas no kernel, sempre terminem, etc. Programas XDP, por exemplo, reutilizam os drivers internos existentes do kernel e operam nos buffers DMA fornecidos que contêm os quadros de pacotes sem expô-los ou um driver inteiro ao espaço do usuário, como em outros modelos. Além disso, programas XDP reutilizam a pilha existente em vez de contorná-la. O BPF pode ser considerado um "código de cola" genérico para as facilidades do kernel na criação de programas para resolver casos de uso específicos.
+\item A execução de um programa BPF dentro do kernel é sempre dirigida por eventos. Exemplos: Um dispositivo de rede que tem um programa BPF anexado ao seu caminho de entrada acionará a execução do programa assim que um pacote for recebido. Ou um endereço de kernel que tem um kprobe com um programa BPF anexado será acionado assim que o código naquele endereço for executado, o que então invocará a função de retorno de chamada do kprobe para instrumentação, subsequente acionamento da execução do programa BPF anexado.
+\end{itemize}
+
+O BPF consiste em onze registradores de 64 bits com sub-registradores de 32 bits, um contador de programa e um espaço de pilha BPF de 512 bytes. Os registradores são nomeados de r0 a r10. O modo de operação é de 64 bits por padrão, os sub-registradores de 32 bits só podem ser acessados por meio de operações ALU (unidade lógica aritmética) especiais. Os sub-registradores inferiores de 32 bits se estendem para 64 bits quando são escritos.
+
+O registrador r10 é o único registrador que é somente leitura e contém o endereço do ponteiro de quadro para acessar o espaço da pilha BPF. Os registradores restantes r0 a r9 são de uso geral e de natureza leitura/escrita.
+
+Um programa BPF pode chamar uma função auxiliar predefinida, que é definida pelo núcleo do kernel (nunca por módulos). A convenção de chamada do BPF é definida da seguinte forma:
+\begin{itemize}
+\item \textbf{r0} contém o valor de retorno de uma chamada de função auxiliar.
+\item \textbf{r1} - \textbf{r5} armazenam argumentos do programa BPF para a função auxiliar do kernel.
+\item \textbf{r6} - \textbf{r9} são registradores salvos pelo chamador que serão preservados na chamada da função auxiliar.
+\end{itemize}
+
+O formato de instrução é modelado como instruções de dois operandos, o que ajuda a mapear instruções BPF para instruções nativas durante a fase JIT. O conjunto de instruções é de tamanho fixo, significando que cada instrução tem codificação de 64 bits. Atualmente, 87 instruções foram implementadas e a codificação também permite estender o conjunto com mais instruções quando necessário. A codificação de instrução de uma única instrução de 64 bits em uma máquina big-endian é definida como uma sequência de bits do bit mais significativo (MSB) ao bit menos significativo (LSB) de \textbf{op}:8, \textbf{dst\_reg:4}, \textbf{src\_reg:4}, \textbf{off:16}, \textbf{imm:32}. \textbf{off} e \textbf{imm} são de tipo assinado. As codificações fazem parte dos cabeçalhos do kernel e estão definidas no cabeçalho \textbf{linux/bpf.h}, que também inclui \textbf{linux/bpf\_common.h}.
+
+\textbf{op} define a operação real a ser realizada. A maior parte da codificação para \textbf{op} foi reutilizada do cBPF. A operação pode ser baseada em operandos de registrador ou imediatos. A codificação de \textbf{op} em si fornece informações sobre qual modo usar (\textbf{BPF\_X} para denotar operações baseadas em registrador e \textbf{BPF\_K} para operações baseadas em imediato, respectivamente). No último caso, o operando de destino é sempre um registrador. Ambos \textbf{dst\_reg} e \textbf{src\_reg} fornecem informações adicionais sobre os operandos de registrador a serem usados (por exemplo, \textbf{r0} - \textbf{r9}) para a operação. \textbf{off} é usado em algumas instruções para fornecer um deslocamento relativo, por exemplo, para endereçar a pilha ou outros buffers disponíveis para o BPF (por exemplo, valores de mapa, dados de pacotes, etc), ou alvos de salto em instruções de salto. \textbf{imm} contém um valor constante/imediato.
+
+%\subsection{Formal Software Specification}
+
+%As especificações formais utilizam linguagens e técnicas matemáticas para descrever de forma precisa e não ambígua o comportamento desejado do software. Modelos formais, como lógica temporal e álgebra de processos, são comumente empregados para representar propriedades e interações entre os componentes do sistema, garantindo a correção e consistência do software desde as fases iniciais do desenvolvimento.
+
+%De acordo com \cite{road}, o processo de formalização tem sido amplamente reconhecido por levantar questões e detectar problemas significativos nas formulações informais originais. Além disso, a semântica do formalismo fornece regras precisas de interpretação, permitindo superar muitos dos problemas associados à linguagem natural. Uma linguagem com facilidades de estruturação ricas pode gerar especificações mais bem estruturadas.
+
+%As especificações formais oferecem várias vantagens e podem ser manipuladas por ferramentas automatizadas para diversos fins:
+%\begin{itemize}
+%\item Derivar premissas ou consequências lógicas da especificação, para confirmação pelo usuário, por meio de técnicas de prova dedutiva \cite{owre1995formal} \cite{bjorner1996step};
+%\item Verificar a consistência e completude específicas da especificação de forma eficiente \cite{heimdahl1996completeness}\cite{heitmeyer1996automated};
+%\item Gerar exceções de alto nível e precondições de conflito que podem tornar a especificação insatisfatória \cite{van1998managing} \cite{van2000handling};
+%\end{itemize}
+
+%Além disso, especificações formais podem ser geradas a partir de código de programa como base para engenharia reversa e evolução de software \cite{gannod1996strongest} \cite{ernst1999dynamically}, sendo essa a abordagem adotada pelo projeto.
+
+%\subsection{Informal Software Specification}
+
+%As especificações informais, por outro lado, utilizam uma linguagem mais natural e flexível, muitas vezes compostas por descrições em linguagem natural, diagramas de casos de uso e outros artefatos. Essa abordagem é valiosa para a comunicação eficaz com stakeholders não técnicos e para as fases iniciais do ciclo de vida do software. No entanto, a natureza menos precisa dessas especificações pode levar a interpretações ambíguas e desafios na validação e verificação, como é o caso da especificação atual disponível para o \cite{extended}.
+
+\subsection{EBPF formalization on Lean}
+
+A formalização de sistemas complexos, como o eBPF (extended Berkeley Packet Filter), em linguagens formais como Lean é uma tarefa que exige precisão e clareza na definição dos elementos constituintes do sistema. Neste capítulo, será discutido em detalhes os métodos e abordagens empregados para desenvolver essa formalização, com foco na semântica e na sintaxe do eBPF, e como estas foram representadas em Lean. Também será abordado as técnicas de parsing utilizadas para converter padrões de entrada em expressões formais dentro do sistema.
+
+De acordo com \cite{walia2020sham}, as linguagens específicas de domínio (DSLs) oferecem benefícios duplos. Ao simplificar a semântica e a notação, elas permitem que os programadores especifiquem o que desejam sem se preocupar com detalhes irrelevantes \cite{perlis1982special}. Além disso, ao restringir a liberdade de expressão, elas possibilitam que compiladores empreguem otimizações poderosas que seriam inviáveis em linguagens de propósito geral.
+
+No entanto, construir uma DSL que traga esses benefícios pode ser um trabalho árduo. Implementar uma DSL que simplifica semântica e notação requer atenção a aspectos como análise sintática, verificação de tipos e suporte em tempo de execução. É comum aproveitar recursos da linguagem hospedeira, como macros em Racket \cite{flatt2010reference}, classes de tipo em Haskell ou objetos em JavaScript. Reutilizar esses recursos facilita a integração da DSL com a linguagem hospedeira, permitindo a chamada entre elas. Essa interoperabilidade pode ser alcançada incorporando a DSL como uma biblioteca na linguagem hospedeira ou implementando-a como um gerador de código que produz código na linguagem hospedeira.
+
+\subsection{Types Definition}
+
+A primeira etapa na formalização do eBPF em Lean envolveu a definição dos tipos fundamentais que representam os elementos do sistema. A seguir, discutiremos as principais construções de tipos e sua relevância no contexto da formalização.
+
+Os tipos \textbf{Immediate} e \textbf{Pc} foram definidos como tipos básicos que encapsulam valores numéricos naturais (N). Eles representam, respectivamente, valores imediatos em instruções e o contador de programa (program counter). A escolha de encapsular números naturais nesses tipos específicos visa garantir clareza semântica, permitindo que o sistema distinga facilmente entre diferentes usos de números inteiros.
+
+\begin{center}
+\begin{verbatim}
+
+    inductive Immediate : Type 
+    | mk : N → Immediate
+    
+    inductive Pc : Type 
+    | mk : N → Pc
+    
+\end{verbatim}
+\end{center}
+
+O tipo \textbf{RegisterCode} foi definido como uma enumeração que lista todos os registradores possíveis no contexto do eBPF, incluindo o \textbf{r0} a \textbf{r10}, além de um registrador especial \textbf{rP}. Este tipo permite que cada registrador seja tratado de forma distinta no sistema formalizado.
+
+\begin{center}
+\begin{verbatim}
+    
+    inductive RegisterCode : Type
+    | r0  : RegisterCode
+    | r1  : RegisterCode
+    | r2  : RegisterCode
+    | r3  : RegisterCode
+    | r4  : RegisterCode
+    | r5  : RegisterCode
+    | r6  : RegisterCode
+    | r7  : RegisterCode
+    | r8  : RegisterCode
+    | r9  : RegisterCode
+    | r10 : RegisterCode
+    | rP  : RegisterCode
+    
+\end{verbatim}
+\end{center}
+
+O tipo \textbf{Register} foi então definido como um par que consiste em um código de registrador (RegisterCode) e um conteúdo (Content). Isso permite que cada registrador armazene um valor numérico.
+
+\begin{center}
+\begin{verbatim}   
+
+    inductive Register : Type
+    | mk : RegisterCode → Content → Register
+    
+\end{verbatim}
+\end{center}
+
+Para representar um conjunto de registradores, o tipo \textbf{Registers} foi definido como uma lista encadeada de registradores. Isso permite operações recursivas sobre conjuntos de registradores, facilitando a manipulação dentro do sistema formalizado.
+
+\begin{center}
+\begin{verbatim}
+
+    inductive Registers : Type
+    | Nil : Register → Registers
+    | Cons : Register → Registers → Registers
+    
+\end{verbatim}
+\end{center}
+
+O tipo \textbf{OpCode} é um dos elementos centrais na formalização do eBPF, pois representa as operações que podem ser executadas por um programa eBPF. Este tipo foi definido como uma combinação de três componentes: \textbf{Msb} (Most Significant Byte), \textbf{Source}, e \textbf{Lsb} (Least Significant Byte). Cada um desses componentes captura diferentes aspectos de uma operação, permitindo uma representação rica das instruções.
+
+\begin{center}
+\begin{verbatim}
+    
+    inductive OpCode : Type
+    | Eof : OpCode
+    | mk : Msb → Source → Lsb → OpCode
+
+\end{verbatim}
+\end{center}
+
+As instruções do eBPF são encapsuladas no tipo \textbf{Word}, que inclui valores imediatos, registradores de origem e destino, e um código de operação (OpCode). O tipo \textbf{Instructions} é definido como uma lista encadeada de instruções (Word), permitindo a construção de programas completos.
+
+\begin{center}
+\begin{verbatim}
+    
+    inductive Word : Type
+    | mk : Immediate → Offset → SourceReg →
+     DestinationReg → OpCode → Word
+     
+    inductive Instructions : Type
+    | Nil : Word → Instructions
+    | Cons : Word → Instructions → Instructions
+
+\end{verbatim}
+\end{center}
+
+O tipo \textbf{Program} foi definido para representar um programa completo em eBPF. Ele inclui um conjunto de registradores, uma lista de instruções, e o contador de programa. Essa estrutura permite a simulação e análise de programas eBPF dentro do sistema formalizado.
+
+\begin{center}
+\begin{verbatim}
+    
+    inductive Program : Type
+    | mk : Registers → Instructions → Pc → Program
+
+\end{verbatim}
+\end{center}
+
+\subsection{Parsing Methods}
+
+Após definir os tipos fundamentais, a próxima etapa crucial foi a criação de um parser para traduzir a entrada em uma representação interna compreendida pelo sistema Lean. A seguir, discutimos os métodos de parsing aplicados.
+
+O parsing de valores imediatos (Immediate) foi implementado utilizando a função elabImmediate, que converte uma sintaxe de número (num) em uma instância do tipo Immediate. Esse método de parsing é direto e eficaz, permitindo a conversão de valores numéricos para o tipo formalizado.
+\begin{center}
+\begin{verbatim}
+        
+    def elabImmediate : Syntax → MetaM Expr
+
+    | `(imp_Immediate| $n:num) => 
+    mkAppM ``Immediate.mk #[mkNatLit n.getNat]
+
+\end{verbatim}
+\end{center}
+
+O parsing de códigos de registradores foi um pouco mais complexo, exigindo uma correspondência de padrões para cada registrador específico (\%r0, \%r1, etc.). A função elabRegisterCode foi responsável por essa tradução, garantindo que cada registrador fosse corretamente identificado.
+
+\begin{center}
+\begin{verbatim}
+    
+    def elabRegisterCode : Syntax → MetaM Expr  
+    | `(imp_RegisterCode| %r0) => 
+    return .const ``RegisterCode.r0 []
+    | `(imp_RegisterCode| %r1) =>
+    return .const ``RegisterCode.r1 []
+
+\end{verbatim}
+\end{center}
+
+O parsing de instruções do eBPF, representadas pelo tipo Word, exigiu uma combinação dos parsers previamente definidos para Immediate, Offset, SourceReg, DestinationReg, e OpCode. A função elabWord foi implementada para processar uma instrução completa, convertendo-a em uma expressão formal no Lean.
+\begin{center}
+\begin{verbatim}
+        
+    def elabWord : Syntax → MetaM Expr
+    | `(imp_Word| $a:imp_Immediate $b:imp_Offset
+    $c:imp_SourceReg$d:imp_DestinationReg 
+    $e:imp_OpCode ) => 
+    do
+    let a ← elabImmediate a
+    let b ← elabOffset b
+    let c ← elabSourceReg c
+    let d ← elabDestinationReg d
+    let e ← elabOpCode e
+    
+    mkAppM ``Word.mk #[a, b, c, d, e]
+  
+\end{verbatim}
+\end{center}
+
+Finalmente, o parsing de programas completos foi realizado através da função elabProgram, que combina os parsers de registradores, instruções e contador de programa. Esta função permite a tradução de uma entrada textual de um programa eBPF em uma estrutura formalizada pronta para análise e execução em Lean.
+
+\begin{center}
+\begin{verbatim}
+    
+    def elabProgram : Syntax → MetaM Expr
+    | `(imp_Program| $a:imp_Registers 
+    $b:imp_Instructions $c:imp_Pc) => 
+    do
+    let a ← elabRegisters a
+    let b ← elabInstructions b 
+    let c ← elabPc c
+    
+    mkAppM ``Program.mk #[a, b, c]
+
+\end{verbatim}
+\end{center}
+
+\subsection{Execution of Defined Semantics}
+
+A execução da semântica definida no contexto da formalização do eBPF em Lean envolve a criação de funções que simulam o comportamento do programa de acordo com as regras semânticas estabelecidas. Estas funções permitem a interpretação e execução de instruções individuais e de programas completos, respeitando a lógica definida na especificação formal.
+
+Antes de mergulhar nas funções específicas, é importante entender o modelo geral de execução semântica que foi adotado. O modelo baseia-se em uma abordagem de máquina de estado, onde o estado do sistema (representado por registradores, memória, etc.) é atualizado conforme as instruções são executadas. A execução de um programa consiste em uma sequência de transições de estado, guiada pelas instruções e pelo contador de programa (Pc).
+
+A função \textbf{regComp} é responsável por comparar dois registradores, reg e regCode, verificando se ambos correspondem ao mesmo código de registrador. A função faz isso ao decompô-los e comparar o campo RegisterCode. Essa comparação é crucial para determinar se uma operação deve ser aplicada a um registrador específico.
+
+\begin{center}
+\begin{verbatim}
+    
+    def regComp (reg : Register) (regCode : RegisterCode)
+    : Bool :=
+    match reg with
+    | Register.mk regCode' _cont =>
+     match regCode', regCode with
+        | RegisterCode.r0, RegisterCode.r0 => true
+        | RegisterCode.r1, RegisterCode.r1 => true
+        | RegisterCode.r2, RegisterCode.r2 => true
+        | RegisterCode.r3, RegisterCode.r3 => true
+        | RegisterCode.r4, RegisterCode.r4 => true
+        | RegisterCode.r5, RegisterCode.r5 => true
+        | RegisterCode.r6, RegisterCode.r6 => true
+        | RegisterCode.r7, RegisterCode.r7 => true
+        | RegisterCode.r8, RegisterCode.r8 => true
+        | RegisterCode.r9, RegisterCode.r9 => true
+        | RegisterCode.r10, RegisterCode.r10 => true
+        | _ , _=> false
+
+\end{verbatim}
+\end{center}
+
+As funções \textbf{getDestCode}, \textbf{getSrcCode}, \textbf{getNatCont}, \textbf{getNatImm}, e \textbf{getCont} são responsáveis por extrair o código do registrador e o conteúdo associado a um registrador ou outros componentes. Essas funções são úteis para acessar rapidamente informações necessárias para a execução de operações aritméticas ou de movimentação.
+
+\begin{center}
+\begin{verbatim}
+        
+    def getDestCode (destReg : DestinationReg) :  RegisterCode  :=
+    match destReg with
+    | DestinationReg.mk x => x
+
+    def getSrcCode (srcReg : SourceReg) :  RegisterCode  :=
+    match srcReg with
+    | SourceReg.mk x => x
+    
+    def getNatCont (cont : Content) :  N  :=
+    match cont with
+    | Content.mk nat => nat
+
+    def getCont (reg : Register) :  N  :=
+    match reg with
+    | Register.mk _ cont => (getNatCont cont)
+
+    def getNatImm (imm : Immediate) :  N  :=
+    match imm with
+    | Immediate.mk nat => nat
+    
+\end{verbatim}
+\end{center}
+
+A função \textbf{getReg} permite acessar o conteúdo de um registrador específico dentro de uma lista de registradores, regs. Essa função navega pela lista de registradores e, utilizando a função regComp, identifica o registrador correto para retornar seu conteúdo.
+
+Para modificar o conteúdo de um registrador, as funções \textbf{saveAtReg} e \textbf{saveAtRegs} são usadas. saveAtReg atualiza o conteúdo de um único registrador, enquanto saveAtRegs aplica essa atualização a uma lista de registradores. Essas funções são críticas para refletir as mudanças no estado do programa após a execução de uma instrução.
+
+\begin{center}
+\begin{verbatim}
+    
+    def getReg (regs : Registers) 
+    (regCode : RegisterCode) : N  :=
+     match regs with
+    | Registers.Nil reg' => (getCont reg')
+    | Registers.Cons reg' regs' =>  
+    match (regComp reg' regCode) with
+        | true => (getCont reg')
+        | false => (getReg regs' regCode)
+
+    def saveAtReg (reg : Register) 
+    (regCode : RegisterCode) (val : N ) 
+    : Register :=
+    match (regComp reg regCode) with
+    | true =>
+    match reg with
+        | Register.mk rCode _ => 
+        Register.mk rCode (Content.mk val)
+    | false => reg
+
+    partial def saveAtRegs (regs : Registers) 
+    (regCode : RegisterCode) (val : N ) 
+    : Registers :=
+     match regs with
+    | Registers.Nil r => Registers.Nil 
+    (saveAtReg r regCode val )
+    | Registers.Cons r rs => Registers.Cons 
+    (saveAtReg r regCode val )
+    (saveAtRegs rs regCode val)
+
+\end{verbatim}
+\end{center}
+
+A função \textbf{execMsb} é responsável por executar operações aritméticas e de movimentação baseadas no valor do Msb (Most Significant Byte). Dependendo do Msb fornecido, a função pode realizar operações como adição, subtração, multiplicação, divisão, ou apenas mover um valor de um registrador para outro.
+
+\begin{center}
+\begin{verbatim}
+        
+    def execMsb (msb : Msb) (x y : N ) : N  :=
+    match msb with
+        | Msb.bpf\_add => x + y
+        | Msb.bpf\_sub => x - y
+        | Msb.bpf\_mul => x * y
+        | Msb.bpf\_div => x / y
+        | Msb.bpf\_mov => y
+        | _ => 0
+  
+\end{verbatim}
+\end{center}
+
+A função \textbf{applyWord} é responsável por aplicar uma única instrução, representada por um Word, ao conjunto de registradores regs. Dependendo do OpCode e de outros componentes do Word, a função decide como combinar e aplicar os valores dos registradores ou imediatos (constantes) envolvidos. Ela atualiza o estado dos registradores com base no resultado das operações executadas.
+
+\begin{center}
+\begin{verbatim}
+    
+    def applyWord (regs : Registers) (word : Word) 
+    : Registers :=
+    match word with 
+    | Word.mk imm _offset srcReg destReg opCode =>
+    match opCode with
+      | OpCode.Eof => regs 
+      | OpCode.mk msb source _lsb => 
+      match msb with 
+        | Msb.bpf_end => regs  
+        | _ =>  
+        match source with    
+        | Source.bpf_x => 
+        (saveAtRegs regs (getDestCode destReg)
+        (execMsb msb (getReg regs 
+        (getDestCode destReg))
+        (getReg regs (getSrcCode srcReg))))    
+        
+        | Source.bpf_k =>
+        (saveAtRegs regs (getDestCode destReg)
+        (execMsb msb (getReg regs 
+        (getDestCode destReg))(getNatImm imm)))
+            
+\end{verbatim}
+\end{center}
+
+A função \textbf{applyWordJmp} manipula instruções de desvio, ajustando a lista de instruções (Instructions) de acordo com o deslocamento (Offset) especificado na instrução. Essa função é fundamental para implementar o controle de fluxo em um programa eBPF, permitindo saltos condicional e incondicional.
+\begin{center}
+\begin{verbatim}
+    
+    def applyWordJmp (instr : Instructions) 
+    (word : Word): Instructions :=
+    match word with
+    | Word.mk imm offset srcReg destReg opCode =>
+    match instr, offset with
+        | Instructions.Nil _w, Offset.mk _ =>
+        Instructions.Nil 
+        (Word.mk imm offset srcReg destReg OpCode.Eof)
+        | Instructions.Cons _w ws, Offset.mk off =>
+        applyWordJmp ws (Word.mk imm (Offset.mk (off-1))
+        srcReg destReg opCode)
+        | _, Offset.Exit =>
+        Instructions.Nil 
+        (Word.mk imm offset srcReg destReg OpCode.Eof)
+
+\end{verbatim}
+\end{center}
+
+A função \textbf{exeMain} é o ponto central da execução de um programa eBPF. Ela recebe um Program, composto por registradores, uma lista de instruções, e um contador de programa (Pc). A função processa as instruções em sequência, aplicando as funções discutidas anteriormente para modificar o estado do programa e avançar o contador de programa. Dependendo do tipo de instrução (identificado pelo Lsb), ela decide se a execução deve continuar normalmente ou se um salto deve ser realizado.
+
+\begin{center}
+\begin{verbatim}
+        
+  partial def exeMain (prog : Program) : Program :=
+  match prog with
+  | Program.mk regs instr (Pc.mk pc)=>
+  match instr with
+    | Instructions.Nil _word => prog
+    | Instructions.Cons word instr' =>
+    match word with
+      | Word.mk _imm _offser _srcReg _destReg opCode =>
+      match opCode with
+        | OpCode.Eof => prog
+        | OpCode.mk _msb _source lsb =>
+          let pc' := (Pc.mk (pc+1))
+          match lsb with
+            | Lsb.bpf\_ld => 
+            exeMain (Program.mk 
+            (applyWord regs word) instr' pc')
+            | Lsb.bpf\_ldx => 
+            exeMain (Program.mk 
+            (applyWord regs word) instr' pc')
+            | Lsb.bpf\_st => 
+            exeMain (Program.mk 
+            (applyWord regs word) instr' pc') 
+            | Lsb.bpf\_stx =>
+            exeMain (Program.mk 
+            (applyWord regs word) instr' pc')
+            | Lsb.bpf\_alu => 
+            exeMain (Program.mk 
+            (applyWord regs word) instr' pc')
+            | Lsb.bpf\_jmp =>
+            exeMain (Program.mk regs 
+            (applyWordJmp instr' word)  pc')
+            | Lsb.bpf\_jmp32 =>
+            exeMain (Program.mk regs 
+            (applyWordJmp instr' word)  pc')
+            | Lsb.bpf\_alu64 =>
+            exeMain (Program.mk 
+            (applyWord regs word) instr' pc')
+
+\end{verbatim}
+\end{center}
+
+
+\section{Related Works}
+
+No trabalho de \cite{gershuni2019simple}, foi proposto um analisador estático para o eBPF no contexto da interpretação abstrata. A escolha de abstração é baseada em padrões comuns encontrados em muitos programas eBPF. Pode se observar que esses programas manipulam a memória de maneira disciplinada, o que permite analisá-los com sucesso usando uma combinação escalável de abstração muito precisa de certas regiões limitadas, juntamente com abstrações mais grossas de outras partes da memória. Foi utilizado o domínio de zona, um domínio simples que rastreia diferenças entre pares de registradores e deslocamentos, para realizar uma análise precisa e escalável. Foi demonstrado que essa abstração é tão precisa na prática quanto domínios abstratos mais custosos, como Octágono e Poliedro.
+
+Além disso, a avaliação do trabalho de \cite{gershuni2019simple}, também é baseada em centenas de programas eBPF do mundo real, demonstra que a nova ferramenta gera não mais alarmes falsos do que o verificador Linux existente, ao mesmo tempo em que oferece suporte a uma classe mais ampla de programas (incluindo aqueles com loops) e possui uma complexidade assintótica mais eficiente.
+
+O trabalho realizado por \cite{mohamed2023understanding} estudou as potenciais questões de segurança decorrentes das CVEs (Common Vulnerabilities and Exposures) relacionadas ao eBPF existentes. Em seguida, apresentou um gerador de fuzzing baseado em geração de eBPF que gera programas eBPF sintática e semanticamente válidos para encontrar bugs no componente verificador do subsistema eBPF do kernel Linux. O fuzzing estende o projeto Linux Kernel Library (LKL) para executar várias instâncias leves do Linux simultaneamente, com entradas provenientes de sequências de instruções eBPF geradas automaticamente. Utilizando este fuzzing, foi possivel superar o bpf-fuzzer do repositório GitHub iovisor em termos de velocidade de fuzzing e taxa de sucesso na aprovação do verificador eBPF (código gerado válido). Também foi indetificado dois bugs de rastreamento de intervalo ALU (Arithmetic Logic Unit) existentes que apareceram em uma versão mais antiga do kernel Linux (v5.10).
+
+\section{Results}
+
+A formalização do eBPF em Lean permitiu a construção de um protótipo base capaz de executar palavras da linguagem eBPF de maneira precisa e controlada. Essa implementação inicial marca um avanço significativo na simulação de programas eBPF dentro de um ambiente formalmente verificado, o que é crucial para a análise e desenvolvimento seguro de aplicações que utilizam essa tecnologia. Através da definição de tipos fundamentais e da criação de um sistema de parsing eficiente, foi possível traduzir programas eBPF para uma representação interna em Lean, possibilitando sua interpretação e execução direta.
+
+O protótipo desenvolvido executa com sucesso instruções individuais, manipulando registradores e valores imediatos conforme as regras semânticas estabelecidas. As funções de execução, como a applyWord e a exeMain, demonstraram ser eficazes na simulação de operações aritméticas e de controle de fluxo, garantindo que os programas eBPF sejam processados de acordo com suas especificações. Este protótipo, embora ainda em fase inicial, já oferece uma base sólida para futuras expansões, como a adição de mecanismos de verificação de segurança e otimizações de desempenho.
+
+No entanto, apesar do progresso alcançado, o protótipo atual apresenta limitações significativas no que diz respeito à verificação de programas e ao controle de memória. Especificamente, erros de acesso indevido à memória e de controle inadequado de fluxo não foram tratados de maneira exaustiva. A ausência de uma verificação formal para evitar acessos a regiões de memória não autorizadas ou a manipulação incorreta de ponteiros representa um risco para a segurança do sistema, especialmente em aplicações críticas onde o eBPF é utilizado para monitoramento ou filtragem de pacotes de rede.
+
+Essas limitações destacam a necessidade de futuras melhorias no sistema, com o desenvolvimento de verificadores automáticos que possam assegurar que programas eBPF sejam livres de erros de execução. A implementação de técnicas de verificação formal que garantam a correção das operações de leitura e escrita, bem como a prevenção de vulnerabilidades comuns, como estouro de buffer e acessos fora dos limites de memória, é uma etapa essencial para tornar o protótipo adequado ao uso em ambientes reais.
+
+Em suma, os resultados obtidos até o momento são promissores e indicam que a formalização do eBPF em Lean é uma abordagem viável para a simulação e análise de programas. No entanto, há ainda um longo caminho a ser percorrido para garantir a segurança e a robustez necessárias para aplicações práticas. A próxima fase de desenvolvimento deve focar em aprimorar os mecanismos de verificação e expandir as capacidades do protótipo, de modo a lidar com cenários mais complexos e garantir a integridade do sistema em situações críticas.
+
+\section{Conclusion}
+
+Neste trabalho, foi apresentada a formalização da linguagem eBPF utilizando o sistema de prova Lean, com o objetivo de criar um protótipo base capaz de executar programas eBPF de maneira formalmente verificada. Como foi discutido na introdução, a relevância do eBPF no contexto atual, destacando sua aplicação em diversas áreas, como segurança de sistemas e monitoramento de redes, e a necessidade de uma formalização rigorosa para garantir a segurança e a confiabilidade dessas aplicações. A escolha do Lean como ferramenta de formalização foi justificada pela sua robustez em lidar com sistemas de prova e pela capacidade de modelar linguagens de programação de forma precisa.
+
+O desenvolvimento do trabalho envolveu a definição das estruturas sintáticas e semânticas do eBPF em Lean, a criação de funções para o parsing dos programas e a implementação de mecanismos de execução das palavras da linguagem. Cada etapa foi cuidadosamente elaborada para assegurar que as operações fossem representadas de forma fiel ao comportamento esperado do eBPF. Além disso, foram realizadas análises críticas durante o desenvolvimento, que identificaram as áreas onde a formalização poderia ser ampliada ou otimizada, destacando a importância de uma abordagem iterativa e incremental.
+
+Os resultados obtidos demonstram que foi possível construir um protótipo funcional, capaz de executar instruções básicas da linguagem eBPF com correção. A implementação inicial permitiu a simulação de operações fundamentais, como aritmética em registradores e controle de fluxo, proporcionando uma base sólida para futuras expansões. Contudo, o trabalho também revelou as limitações atuais, especialmente no que diz respeito à verificação formal de erros de acesso à memória e controle inadequado de fluxo. Essas questões ainda precisam ser abordadas para garantir a segurança total da execução de programas eBPF.
+
+Em conclusão, o trabalho realizado representa um avanço significativo na formalização da linguagem eBPF, oferecendo uma ferramenta útil para a análise e verificação de programas. A introdução, o desenvolvimento e os resultados obtidos demonstram a viabilidade e a importância dessa abordagem, embora evidenciem a necessidade de melhorias contínuas. Futuras pesquisas devem focar em aprimorar os mecanismos de verificação e expandir as capacidades do protótipo, com o objetivo de criar um sistema robusto e seguro para o uso prático em aplicações que dependem da confiabilidade e precisão do eBPF. Este trabalho pavimenta o caminho para um futuro onde programas eBPF possam ser desenvolvidos, verificados e executados dentro de um ambiente formalmente verificado, aumentando a segurança e a confiança em sistemas críticos.
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{samples/ref}
+
+
+\end{document}
+\endinput
+%%
+%% End of file `sample-acmcp.tex'.
