@@ -551,7 +551,7 @@ declare_syntax_cat imp_WordT
 syntax imp_OpCodeT imp_SourceReg "," imp_DestinationReg: imp_WordT
 syntax imp_OpCodeT imp_SourceReg "," imp_Immediate: imp_WordT
 syntax "exit" : imp_WordT
-
+-- Adequar para as possiveis diferentes classes
 def elabWordT : Syntax → MetaM Expr
 | `(imp_WordT| $a:imp_OpCodeT $b:imp_SourceReg , $c:imp_DestinationReg) => do
   let a ← elabOpCodeT a
@@ -680,6 +680,7 @@ result
 #Comentario com espacos
 asm
 mov32 %r0, 0
+mov32 %r1, 0
 add32 %r0, %r1
 add32 %r0, %r1
 mov32 %r0, 0
@@ -902,7 +903,7 @@ def exeMainFuel (prog : Program) (fuel : ℕ ) : Program :=
 } 10
 
 #eval exeMainFuel {exe|
-  %r2 0 %r3 0
+  %r0 0 %r1 0 %r2 0 %r3 0
   (
   2 0 %r2 %r1 bpf_mov bpf_k bpf_alu
   6 0 %r1 %r2 bpf_mov bpf_k bpf_alu

@@ -51,15 +51,6 @@ inductive Content : Type
 | mk: ℕ → Content
 deriving Repr
 
-inductive Register : Type
-| mk : RegisterCode → Content → Register
-deriving Repr
-
-inductive Registers : Type -- Trocar para Mapeamento Finito
-| Nil : Register → Registers
-| Cons : Register → Registers → Registers
-deriving Repr
-
 inductive Lsb: Type
 | bpf_ld : Lsb
 | bpf_ldx : Lsb
@@ -111,49 +102,26 @@ inductive Instructions : Type
 | Cons : Word → Instructions → Instructions
 deriving Repr
 
-inductive Program: Type
-| mk : Registers → Instructions → Pc → Program
-deriving Repr
-
-inductive ProgramList: Type
-| mk : List Register → List Word → Pc → ProgramList
-deriving Repr
-
-#eval Content.mk 1
-
 -----Testes da Semantica
 
 def Ex_Content := Content.mk 5
 def Ex_Immediate := Immediate.mk 25
 def Ex_Pc := Pc.mk 0
 def Ex_Offset := Offset.mk 0
-def Ex_Register := Register.mk RegisterCode.r1 Ex_Content
-def Ex_Register1 := Register.mk RegisterCode.r1 (Content.mk 7)
-def Ex_Registers := Registers.Cons Ex_Register (Registers.Cons Ex_Register1 (Registers.Nil Ex_Register1))
 def Ex_OpCode : OpCode := OpCode.mk Msb.bpf_add Source.bpf_k Lsb.bpf_alu
 def Ex_Word : Word := Word.mk Ex_Immediate Ex_Offset (SourceReg.mk RegisterCode.r2) (DestinationReg.mk RegisterCode.r3) Ex_OpCode
 def Ex_Instructions := Instructions.Cons Ex_Word (Instructions.Cons Ex_Word (Instructions.Nil Ex_Word))
 
 
-def Ex_Program : Program :=
-  Program.mk Ex_Registers Ex_Instructions Ex_Pc
-
-def Ex_ProgramList : ProgramList :=
-  ProgramList.mk [Ex_Register] [Ex_Word] Ex_Pc
 
 
 #eval Ex_Content
 #eval Ex_Immediate
 #eval Ex_Pc
 #eval Ex_Offset
-#eval Ex_Register
-#eval Ex_Register1
-#eval Ex_Registers
 #eval Ex_OpCode
 #eval Ex_Word
 #eval Ex_Instructions
-#eval Ex_Program
-#eval Ex_ProgramList
 
 --------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
 --------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
@@ -287,47 +255,6 @@ def elabImmediate : Syntax → MetaM Expr
 
 elab "test_elabImmediate" l:imp_Immediate : term => elabImmediate l
 #reduce test_elabImmediate 3
-
-
---------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
---------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
-
-
-declare_syntax_cat imp_Register
-syntax imp_RegisterCode imp_Content : imp_Register
-
-def elabRegister : Syntax → MetaM Expr
-| `(imp_Register| $l:imp_RegisterCode $b:imp_Content) => do
-  let l ← elabRegisterCode l
-  let b ← elabContent b
-  mkAppM ``Register.mk #[l, b]
-
-| _ => throwUnsupportedSyntax
-
-elab "test_elabRegister" l:imp_Register : term => elabRegister l
-#reduce test_elabRegister %r1 9
-
-
---------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
---------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
-
-
-declare_syntax_cat imp_Registers
-syntax imp_Register imp_Registers : imp_Registers
-syntax imp_Register : imp_Registers
-
-partial def elabRegisters : Syntax → MetaM Expr
-| `(imp_Registers| $l:imp_Register) => do
-  let l ← elabRegister l
-  mkAppM ``Registers.Nil #[l]
-| `(imp_Registers| $l:imp_Register $b:imp_Registers) => do
-  let l ← elabRegister l
-  let b ← elabRegisters b
-  mkAppM ``Registers.Cons #[l, b]
-| _ => throwUnsupportedSyntax
-
-elab "test_elabRegisters" l:imp_Registers : term => elabRegisters l
-#reduce test_elabRegisters %r1 7 %r2 8 %r3 9
 
 
 --------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
@@ -614,40 +541,87 @@ def processFile (filePath : String) : IO Unit := do
 -/
 
 
-
-
-
-
-
 --------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
 --------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
 --------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
 --------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
 ---- Inicio da Sintaxe de eBPF
 
+-------Memoria de registradores do eBPF
+structure Registers where
+  r0 : Nat
+  r1 : Nat
+  r2 : Nat
+  r3 : Nat
+  r4 : Nat
+  r5 : Nat
+  r6 : Nat
+  r7 : Nat
+  r8 : Nat
+  r9 : Nat
+deriving Repr
 
+def readReg (regs : Registers) (r : RegisterCode) : Nat :=
+  match r with
+  | RegisterCode.r0 => regs.r0
+  | RegisterCode.r1 => regs.r1
+  | RegisterCode.r2 => regs.r2
+  | RegisterCode.r3 => regs.r3
+  | RegisterCode.r4 => regs.r4
+  | RegisterCode.r5 => regs.r5
+  | RegisterCode.r6 => regs.r6
+  | RegisterCode.r7 => regs.r7
+  | RegisterCode.r8 => regs.r8
+  | RegisterCode.r9 => regs.r9
+  | _ => 0
 
+def writeReg (regs : Registers) (r : RegisterCode) (val : Nat) : Registers :=
+  match r with
+  | RegisterCode.r0 => { regs with r0 := val }
+  | RegisterCode.r1 => { regs with r1 := val }
+  | RegisterCode.r2 => { regs with r2 := val }
+  | RegisterCode.r3 => { regs with r3 := val }
+  | RegisterCode.r4 => { regs with r4 := val }
+  | RegisterCode.r5 => { regs with r5 := val }
+  | RegisterCode.r6 => { regs with r6 := val }
+  | RegisterCode.r7 => { regs with r7 := val }
+  | RegisterCode.r8 => { regs with r8 := val }
+  | RegisterCode.r9 => { regs with r9 := val }
+  | _ => regs
 
+def initialRegisters : Registers :=
+  { r0 := 0, r1 := 0, r2 := 0, r3 := 0, r4 := 0
+  , r5 := 0, r6 := 0, r7 := 0, r8 := 0, r9 := 0 }
 
+def exemplo :=
+  let regs := initialRegisters
+  let regs := writeReg regs RegisterCode.r2 42  -- Define r2 = 42
+  let regs := writeReg regs RegisterCode.r5 100 -- Define r5 = 100
+  (readReg regs RegisterCode.r2, readReg regs RegisterCode.r5, readReg regs RegisterCode.r0)
 
+#eval exemplo  -- Retorna (42, 100, 0)
 
+-------------------Definição da Pilha de Memoria
+structure MemorySpace where
+  data : Fin 512 → Nat
 
-def regComp (reg : Register) (regCode : RegisterCode) : Bool :=
-  match reg with
-  | Register.mk regCode' _cont =>
-  match regCode', regCode with
-  | RegisterCode.r0, RegisterCode.r0 => true
-  | RegisterCode.r1, RegisterCode.r1 => true
-  | RegisterCode.r2, RegisterCode.r2 => true
-  | RegisterCode.r3, RegisterCode.r3 => true
-  | RegisterCode.r4, RegisterCode.r4 => true
-  | RegisterCode.r5, RegisterCode.r5 => true
-  | RegisterCode.r6, RegisterCode.r6 => true
-  | RegisterCode.r7, RegisterCode.r7 => true
-  | RegisterCode.r8, RegisterCode.r8 => true
-  | RegisterCode.r9, RegisterCode.r9 => true
-  | RegisterCode.r10, RegisterCode.r10 => true
-  | _ , _=> false
+def emptyMemory : MemorySpace :=
+  { data := fun _ => 0 }
+
+def write (mem : MemorySpace) (addr : Fin 512) (val : Nat) : MemorySpace :=
+  { data := fun i => if i = addr then val else mem.data i }
+
+def read (mem : MemorySpace) (addr : Fin 512) : Nat :=
+  mem.data addr
+
+def exemploMem :=
+  let mem1 := emptyMemory
+  let mem2 := write mem1 ⟨10, by decide⟩ 42  -- Escreve 42 na posição 10
+  let mem3 := write mem2 ⟨20, by decide⟩ 100 -- Escreve 100 na posição 20
+  (read mem3 ⟨10, by decide⟩, read mem3 ⟨20, by decide⟩, read mem3 ⟨0, by decide⟩)
+
+#eval exemploMem  -- Retorna (42, 100, 0)
+
 
 
 def getDestCode (destReg : DestinationReg) :  RegisterCode  :=
@@ -662,34 +636,9 @@ def getNatCont (cont : Content) :  ℕ  :=
   match cont with
     | Content.mk nat => nat
 
-def getCont (reg : Register) :  ℕ  :=
-  match reg with
-    | Register.mk _ cont => (getNatCont cont)
-
-
-def getReg (regs : Registers) (regCode : RegisterCode) : ℕ  :=
-  match regs with
-  | Registers.Nil reg' => (getCont reg')
-  | Registers.Cons reg' regs' =>
-    match (regComp reg' regCode) with
-    | true => (getCont reg')
-    | false => (getReg regs' regCode)
-
 def getNatImm (imm : Immediate) :  ℕ  :=
   match imm with
     | Immediate.mk nat => nat
-
-def saveAtReg (reg : Register) (regCode : RegisterCode) (val : ℕ ) : Register :=
-  match (regComp reg regCode) with
-  | true =>
-    match reg with
-    | Register.mk rCode _ => Register.mk rCode (Content.mk val)
-  | false => reg
-
-partial def saveAtRegs (regs : Registers) (regCode : RegisterCode) (val : ℕ ) : Registers :=
-  match regs with
-  | Registers.Nil r => Registers.Nil (saveAtReg r regCode val )
-  | Registers.Cons r rs => Registers.Cons (saveAtReg r regCode val ) (saveAtRegs rs regCode val)
 
 def execMsb (msb : Msb) (x y : ℕ ) : ℕ  :=
   match msb with
@@ -702,7 +651,7 @@ def execMsb (msb : Msb) (x y : ℕ ) : ℕ  :=
 
 
 
-def applyWord (regs : Registers) (word : Word) : Registers :=
+def applyWordAlu (regs : Registers) (word : Word) : Registers :=
   match word with
   | Word.mk imm _offset srcReg destReg opCode =>
     match opCode with
@@ -712,9 +661,12 @@ def applyWord (regs : Registers) (word : Word) : Registers :=
           | Msb.bpf_end => regs
           | _ =>
             match source with
-            | Source.bpf_x => (saveAtRegs regs (getDestCode destReg) (execMsb msb (getReg regs (getDestCode destReg)) (getReg regs (getSrcCode srcReg))  ) )
-            | Source.bpf_k => (saveAtRegs regs (getDestCode destReg) (execMsb msb (getReg regs (getDestCode destReg)) (getNatImm imm)  ) )
+            | Source.bpf_x => (writeReg regs (getDestCode destReg) (execMsb msb (readReg regs (getDestCode destReg)) (readReg regs (getSrcCode srcReg))  ) )
+            | Source.bpf_k => (writeReg regs (getDestCode destReg) (execMsb msb (readReg regs (getDestCode destReg)) (getNatImm imm)  ) )
 
+def applyWordMemory (stack : MemorySpace) (word : Word) : MemorySpace :=
+  match word with
+  | Word.mk _imm _offset _srcReg _destReg _opCode => stack
 
 def applyWordJmp (instr : Instructions) (word : Word) : Instructions :=
   match word with
@@ -724,47 +676,75 @@ def applyWordJmp (instr : Instructions) (word : Word) : Instructions :=
     | Instructions.Cons _w ws, Offset.mk off => applyWordJmp ws (Word.mk imm (Offset.mk (off-1)) srcReg destReg opCode)
     | _, Offset.Exit => Instructions.Nil (Word.mk imm offset srcReg destReg OpCode.Eof)
 
-def exeMainFuel (prog : Program) (fuel : ℕ ) : Program :=
+
+def exeMainFuel (stack : MemorySpace )(regs : Registers) (instr : Instructions) (fuel : ℕ ) : MemorySpace × Registers × Instructions :=
   match fuel with
-  | 0 => prog
+  | 0 => (stack, regs, instr)
   | fuel' + 1 =>
-    match prog with
-    | Program.mk regs instr (Pc.mk pc)=>
       match instr with
-      | Instructions.Nil _word => prog
+      | Instructions.Nil _word => (stack, regs, instr)
       | Instructions.Cons word instr' =>
         match word with
         | Word.mk _imm _offser _srcReg _destReg opCode =>
           match opCode with
-          | OpCode.Eof => prog
+          | OpCode.Eof => (stack, regs, instr)
           | OpCode.mk _msb _source lsb =>
-            let pc' := (Pc.mk (pc+1))
             match lsb with
-            | Lsb.bpf_ld => exeMainFuel (Program.mk (applyWord regs word) instr' pc') fuel'
-            | Lsb.bpf_ldx => exeMainFuel (Program.mk (applyWord regs word) instr' pc') fuel'
-            | Lsb.bpf_st => exeMainFuel (Program.mk (applyWord regs word) instr' pc') fuel'
-            | Lsb.bpf_stx => exeMainFuel (Program.mk (applyWord regs word) instr' pc') fuel'
-            | Lsb.bpf_alu => exeMainFuel (Program.mk (applyWord regs word) instr' pc') fuel'
-            | Lsb.bpf_jmp => exeMainFuel (Program.mk regs (applyWordJmp instr' word)  pc') fuel'
-            | Lsb.bpf_jmp32 => exeMainFuel (Program.mk regs (applyWordJmp instr' word)  pc') fuel'
-            | Lsb.bpf_alu64 => exeMainFuel (Program.mk (applyWord regs word) instr' pc') fuel'
+            | Lsb.bpf_ld => exeMainFuel stack (applyWordAlu regs word) instr' fuel'
+            | Lsb.bpf_ldx => exeMainFuel stack  (applyWordAlu regs word) instr' fuel'
+            | Lsb.bpf_st => exeMainFuel stack  (applyWordAlu regs word) instr' fuel'
+            | Lsb.bpf_stx => exeMainFuel stack  (applyWordAlu regs word) instr' fuel'
+            | Lsb.bpf_alu => exeMainFuel stack  (applyWordAlu regs word) instr' fuel'
+            | Lsb.bpf_jmp => exeMainFuel  stack regs (applyWordJmp instr' word)  fuel'
+            | Lsb.bpf_jmp32 => exeMainFuel stack regs (applyWordJmp instr' word)  fuel'
+            | Lsb.bpf_alu64 => exeMainFuel  stack (applyWordAlu regs word) instr' fuel'
 
+def exeMainFuelV2 (stack : MemorySpace) (regs : Registers) (instr : Instructions) (fuel : ℕ) : MemorySpace × Registers × Instructions :=
+  match fuel with
+  | 0 => (stack, regs, instr)  -- Retorna o estado atual sem executar mais instruções
+  | fuel' + 1 =>
+      match instr with
+      | Instructions.Nil _word => (stack, regs, instr)  -- Programa terminou
+      | Instructions.Cons word instr' =>
+        match word with
+        | Word.mk _imm _offset _srcReg _destReg opCode =>
+          match opCode with
+          | OpCode.Eof => (stack, regs, instr)  -- Parar execução no EOF
+          | OpCode.mk _msb _source lsb =>
+            match lsb with
+            | Lsb.bpf_ld | Lsb.bpf_ldx | Lsb.bpf_alu64 | Lsb.bpf_alu =>
+              -- Operações que alteram os registradores
+              let regs' := applyWordAlu regs word
+              exeMainFuelV2 stack regs' instr' fuel'
 
+            | Lsb.bpf_st | Lsb.bpf_stx =>
+              -- Operações que alteram a memória
+              let stack' := applyWordMemory stack word
+              exeMainFuelV2 stack' regs instr' fuel'
+
+            | Lsb.bpf_jmp | Lsb.bpf_jmp32 =>
+              -- Operações de salto que alteram as instruções
+              let instr'' := applyWordJmp instr' word
+              exeMainFuelV2 stack regs instr'' fuel'
 
 
 -- Criar função que recebe test eval, cria a lista vazia de registradores e chama exeMainFuel
 
-def inputRegisters := test_elabRegisters %r0 0 %r1 0 %r2 0 %r3 0 %r4 0 %r5 0 %r6 0 %r7 0 %r8 0 %r8 0
-#eval inputRegisters
-def inputPc := test_elabPc 0
-#eval inputPc
+instance : Repr MemorySpace where
+  reprPrec _ _ := "(MemorySpace)"
 
-def exeConformance ( input : TestEval ) : Program :=
+instance : Repr Registers where
+  reprPrec _ _ := "(Registers)"
+
+instance : Repr Instructions where
+  reprPrec _ _ := "(Instructions)"
+
+def exeConformance ( input : TestEval ) : MemorySpace × Registers × Instructions :=
   match input with
   | TestEval.mk instructions _expectedResult =>
-    let program := (Program.mk inputRegisters instructions inputPc)
+    --let program := emptyMemory initialRegisters instructions
     let fuel := 100
-    let returnedResult := exeMainFuel program fuel
+    let returnedResult := exeMainFuel emptyMemory initialRegisters instructions fuel
     returnedResult
 
 elab "{exe|" p: imp_TestEval "}" : term => elabTestEval p
@@ -815,8 +795,24 @@ exit
 result
 0x10
 
+def RegisterBank := Fin 10 → Nat
 
+-- Criando um banco de registradores inicializado com 0
+def initRegisters : RegisterBank := fun _ => 0
 
+-- Atualizando um registrador específico
+def updateRegister (rb : RegisterBank) (idx : Fin 10) (val : Nat) : RegisterBank :=
+  fun i => if i = idx then val else rb i
+
+-- Exemplo de uso
+
+#eval (updateRegister initRegisters 3 42) 3 -- Deve retornar 42
+
+#eval (updateRegister initRegisters 2 27) 2 -- Deve retornar 42
+
+#eval initRegisters 3
+
+#eval (updateRegister (updateRegister initRegisters 3 42) 3) 3 27 -- Deve retornar 42
 
 
 /-
@@ -846,31 +842,6 @@ Only allow IPv4 TCP SSH traffic:
          jne #0x16, drop
          pass: ret #-1
          drop: ret #0
--/
-
-
-/-
-Pacote IPv4 + TCP (Permitido ✅)
-Representação do Pacote (Hexadecimal)
-
-Dest MAC   | Src MAC    | EtherType | IP Header ... | Protocol | TCP Header ...
-FF:FF:FF:FF:FF:FF  11:22:33:44:55:66  08 00   45 00 00 3C ...  06   00 14 00 50 ...
-
-Pacote IPv6 + TCP (Descartado ❌)
-Dest MAC   | Src MAC    | EtherType | IPv6 Header ... | Protocol | TCP Header ...
-FF:FF:FF:FF:FF:FF  11:22:33:44:55:66  86 DD   60 00 00 00 ...  06   00 14 00 50 ...
-
-Pacote IPv4 + UDP (Descartado ❌)
-Dest MAC   | Src MAC    | EtherType | IP Header ... | Protocol | UDP Header ...
-FF:FF:FF:FF:FF:FF  11:22:33:44:55:66  08 00   45 00 00 3C ...  11   00 14 00 50 ...
-
-Pacote Ethernet com ARP (Descartado ❌)
-Dest MAC   | Src MAC    | EtherType | ARP Header ...
-FF:FF:FF:FF:FF:FF  11:22:33:44:55:66  08 06   00 01 08 00 ...
-
-
-
-
 -/
 
 
