@@ -622,6 +622,10 @@ def exemploMem :=
 
 #eval exemploMem  -- Retorna (42, 100, 0)
 
+def mem1 := emptyMemory
+def mem2 := write mem1 ⟨10, by decide⟩ 42  -- Escreve 42 na posição 10
+def mem3 := write mem2 ⟨20, by decide⟩ 100 -- Escreve 100 na posição 20
+def inputMem := write mem3 ⟨30, by decide⟩ 150 -- Escreve 100 na posição 20
 
 
 def getDestCode (destReg : DestinationReg) :  RegisterCode  :=
@@ -730,21 +734,38 @@ def exeMainFuelV2 (stack : MemorySpace) (regs : Registers) (instr : Instructions
 
 -- Criar função que recebe test eval, cria a lista vazia de registradores e chama exeMainFuel
 
-instance : Repr MemorySpace where
-  reprPrec _ _ := "(MemorySpace)"
-
 instance : Repr Registers where
-  reprPrec _ _ := "(Registers)"
+  reprPrec regs _ :=
+    s!"Registers(r0 := {regs.r0}, r1 := {regs.r1}, r2 := {regs.r2}, r3 := {regs.r3}, r4 := {regs.r4}, " ++
+    s!"r5 := {regs.r5}, r6 := {regs.r6}, r7 := {regs.r7}, r8 := {regs.r8}, r9 := {regs.r9})"
+
+instance : Repr MemorySpace where
+  reprPrec mem _ :=
+    let contents := List.filterMap (fun i =>
+      if h : i < 512 then
+        let idx : Fin 512 := ⟨i, h⟩  -- Converte ℕ para Fin 512 com prova explícita
+        let val := mem.data idx
+        if val ≠ 0 then some s!"{idx} -> {val}" else none
+      else none) (List.range 512)  -- Garante que os índices estão dentro do limite
+    let memStr := String.intercalate ", " contents
+    s!"MemorySpace({memStr})"
 
 instance : Repr Instructions where
-  reprPrec _ _ := "(Instructions)"
+  reprPrec ins _ :=
+    let rec aux (instrs : Instructions) : List String :=
+      match instrs with
+      | Instructions.Nil w => [reprStr w]  -- Usa `reprStr` para obter um String
+      | Instructions.Cons w rest => (reprStr w) :: aux rest
+    let instrList := aux ins
+    let instrStr := String.intercalate ", " instrList
+    s!"Instructions([{instrStr}])"
 
 def exeConformance ( input : TestEval ) : MemorySpace × Registers × Instructions :=
   match input with
   | TestEval.mk instructions _expectedResult =>
     --let program := emptyMemory initialRegisters instructions
     let fuel := 100
-    let returnedResult := exeMainFuel emptyMemory initialRegisters instructions fuel
+    let returnedResult := exeMainFuel inputMem initialRegisters instructions fuel
     returnedResult
 
 elab "{exe|" p: imp_TestEval "}" : term => elabTestEval p
@@ -844,8 +865,31 @@ Only allow IPv4 TCP SSH traffic:
          drop: ret #0
 -/
 
+/-
 
---Tarefas Semana
---Definir a pilha e os registradores como mapeamento finito
---Garantir que o mapeamento finito está funcionando
---Rodar os exemplos praticos de programas eBPF
+Pacote IPv4 + TCP (Permitido ✅)
+Representação do Pacote (Hexadecimal)
+
+Dest MAC   | Src MAC    | EtherType | IP Header ... | Protocol | TCP Header ...
+FF:FF:FF:FF:FF:FF  11:22:33:44:55:66  08 00   45 00 00 3C ...  06   00 14 00 50 ...
+
+Pacote IPv6 + TCP (Descartado ❌)
+Dest MAC   | Src MAC    | EtherType | IPv6 Header ... | Protocol | TCP Header ...
+FF:FF:FF:FF:FF:FF  11:22:33:44:55:66  86 DD   60 00 00 00 ...  06   00 14 00 50 ...
+
+Pacote IPv4 + UDP (Descartado ❌)
+Dest MAC   | Src MAC    | EtherType | IP Header ... | Protocol | UDP Header ...
+FF:FF:FF:FF:FF:FF  11:22:33:44:55:66  08 00   45 00 00 3C ...  11   00 14 00 50 ...
+
+Pacote Ethernet com ARP (Descartado ❌)
+Dest MAC   | Src MAC    | EtherType | ARP Header ...
+FF:FF:FF:FF:FF:FF  11:22:33:44:55:66  08 06   00 01 08 00 ...
+
+-/
+
+
+-- Tarefas Semana
+-- Rodar os exemplos praticos de programas eBPF
+-- Rodar os testes de conformidade
+
+-- Compilar codigo em c para gerar os codigos eBPF
