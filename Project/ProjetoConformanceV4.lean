@@ -1,5 +1,4 @@
 -- Projeto proposto da formalização do eBPF em Lean
-
 import Mathlib.Tactic.Basic
 import Mathlib.Data.Nat.Defs
 import Aesop
@@ -11,7 +10,6 @@ open Lean.Elab
 open Lean.Elab.Term
 open Lean.Syntax
 open Lean Elab  Meta
-
 
 --------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
 --------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
@@ -36,6 +34,11 @@ deriving Repr
 -------------------Definição da Pilha de Memoria
 structure MemorySpace where
   data : Fin 512 → Nat
+
+inductive StackWord
+  | nil : StackWord
+  | mk : Char → Char → StackWord → StackWord
+deriving Repr
 
 inductive Immediate : Type
 | mk : ℕ → Immediate
@@ -174,7 +177,35 @@ deriving Repr
 --------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
 ----- Inicio do parser para ler os testes de conformidade
 
+declare_syntax_cat imp_StackWord
 
+syntax char char : imp_StackWord  -- Caso base
+syntax char char imp_StackWord : imp_StackWord
+
+
+partial def elabStackWord : Syntax → TermElabM Expr
+  | `(imp_StackWord| $a:char $b:char) => do
+      let aExpr ← mkAppM ``Char.ofNat #[mkRawNatLit a.getChar.toNat]
+      let bExpr ← mkAppM ``Char.ofNat #[mkRawNatLit b.getChar.toNat]
+      mkAppM ``StackWord.mk #[aExpr, bExpr, mkConst ``StackWord.nil]
+  | `(imp_StackWord| $a:char $b:char $rest:imp_StackWord) => do
+      let restExpr ← elabStackWord rest
+      let aExpr ← mkAppM ``Char.ofNat #[mkRawNatLit a.getChar.toNat]
+      let bExpr ← mkAppM ``Char.ofNat #[mkRawNatLit b.getChar.toNat]
+      mkAppM ``StackWord.mk #[aExpr, bExpr, restExpr]
+  | _ => throwUnsupportedSyntax
+
+elab "test_elabStackWord" l:imp_StackWord : term => elabStackWord l
+
+#eval test_elabStackWord 'a' 'b' 'c' 'd' 'e' 'f' '0' '0'
+
+elab "{mem|" p: imp_StackWord "}" : term => elabStackWord p
+
+
+--#reduce test_elabStackWord 'a' 'b' 'c' 'd' 'e' 'f'
+
+--------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
+--------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
 declare_syntax_cat imp_RegisterCode
 syntax "%r0" : imp_RegisterCode
 syntax "%r1" : imp_RegisterCode
@@ -552,10 +583,21 @@ exit
 result
 0x10
 
---------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
---------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
---------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
---------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<
+
+--------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+--------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+--------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+--------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+--------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+--------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+--------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+--------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+--------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+--------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+--------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+--------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+--------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+--------->>>>>>>>>>>>>>>>>><<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 ---- Inicio da Sintaxe de eBPF
 
 def emptyMemory : MemorySpace :=
@@ -595,11 +637,82 @@ def writeMem (mem : MemorySpace) (addr : Fin 512) (val : Nat) : MemorySpace :=
 def readMem (mem : MemorySpace) (addr : Fin 512) : Nat :=
   mem.data addr
 
+-- Le o espaço de memoria retornando o valor natural contido no indice index
 def readMemNat (mem : MemorySpace) (index : Nat) : Nat :=
   mem.data (⟨ index % 512, by {
   have h : index % 512 < 512 := Nat.mod_lt index (by decide)
   exact h
 }⟩)
+
+-- Convert a hexadecimal character to a natural number
+def hexCharToNat (c : Char) : Nat :=
+  if '0' ≤ c ∧ c ≤ '9' then
+    Char.toNat c - Char.toNat '0'
+  else if 'a' ≤ c ∧ c ≤ 'f' then
+    10 + Char.toNat c - Char.toNat 'a'
+  else if 'A' ≤ c ∧ c ≤ 'F' then
+    10 + Char.toNat c - Char.toNat 'A'
+  else
+    panic! s!"Invalid hexadecimal character: {c}"
+
+-- Convert a list of hexadecimal characters to a natural number
+def hexToNatList (s : List Char) (acc : Nat) : Nat :=
+  match s with
+  | [] => acc
+  | c :: rest =>
+    let n := hexCharToNat c
+    hexToNatList rest (16 * acc + n)
+
+-- Convert a hexadecimal string to a natural number
+def hexToNat (s : String) : Nat :=
+  hexToNatList s.toList 0
+
+-- Example usage
+#check hexToNat "a246dadf4"  -- Output: 43494831220
+#eval hexToNat "0"          -- Output: 0
+#eval hexToNat "A1F"        -- Output: 2591
+
+-- Converte um número (0-15) para o caractere hexadecimal correspondente
+def natToHexChar (n : ℕ) : Char :=
+  if n < 10 then
+    Char.ofNat (n + 48)  -- '0' é representado por 48 na tabela ASCII
+  else
+    Char.ofNat (n - 10 + 97)  -- 'a' é representado por 97 na tabela ASCII
+
+-- Função recursiva para gerar a representação hexadecimal como uma lista de caracteres
+def natToHexRec (n : ℕ) : List Char :=
+  if n = 0 then []
+  else natToHexRec (n / 16) ++ [natToHexChar (n % 16)]
+
+-- Função principal que lida com o caso em que n = 0
+def natToHexCharList (n : ℕ) : List Char :=
+  if n = 0 then ['0']
+  else natToHexRec n
+
+def natToHexString (n : ℕ) : String :=
+  if n = 0 then String.mk ['0']
+  else String.mk (natToHexRec n)
+
+#eval natToHexCharList 255  -- Saída esperada: ['f', 'f']
+#eval natToHexString 255  -- Saída esperada: ['f', 'f']
+
+
+theorem provaFin (index : Nat) : index % 512 < 512 := by
+  -- Introduce the fact using `have`
+  have h : index % 512 < 512 := Nat.mod_lt index (by decide)
+  -- Use the fact to prove the goal
+  exact h
+
+def createStackMemory (index : ℕ )(stack : MemorySpace) (input : StackWord) : MemorySpace :=
+  match input with
+  | StackWord.mk charA charB rest =>
+    let value := hexToNatList [charA,charB] 0
+    createStackMemory (index + 1) (writeMem stack ⟨ index % 512, provaFin index⟩ value) rest
+  | StackWord.nil => stack
+
+#check ['a', 'a']
+
+#eval createStackMemory 0 emptyMemory {mem| '0' '0' '0''0' 'c''0' '9''f' 'a''0' '9''7' '0''0' 'a' '0' }
 
 def getDestCode (destReg : DestinationReg) :  RegisterCode  :=
   match destReg with
@@ -627,7 +740,6 @@ def execMsb (msb : Msb) (x y : ℕ ) : ℕ  :=
   | _ => 0
 
 
-
 def applyWordAlu (regs : Registers) (word : Word) : Registers :=
   match word with
   | Word.mk imm _offset srcReg destReg opCode =>
@@ -640,6 +752,55 @@ def applyWordAlu (regs : Registers) (word : Word) : Registers :=
             match source with
             | Source.bpf_x => (writeReg regs (getDestCode destReg) (execMsb msb (readReg regs (getDestCode destReg)) (readReg regs (getSrcCode srcReg))  ) )
             | Source.bpf_k => (writeReg regs (getDestCode destReg) (execMsb msb (readReg regs (getDestCode destReg)) (getNatImm imm)  ) )
+
+
+--Criar função que dado stack indice e tamanho retorna o valor desejado
+
+
+#check hexToNat "a246dadf4"  -- Output: 43494831220
+#eval hexToNat "0"          -- Output: 0
+#eval hexToNat "A1F"        -- Output: 2591
+#eval natToHexCharList 255  -- Saída esperada: ['f', 'f']
+#eval natToHexString 255  -- Saída esperada: "ff"
+
+--Passar tamanho da palavra -1
+--Começa a obter os valores a partir do indice passado e guarda a palavra de forma inversa igual ao subnet
+def returnMemoryBlockNat ( stack : MemorySpace ) ( index: ℕ ) ( size : ℕ ) : ℕ  :=
+  match size with
+  | 0 => readMemNat stack index
+  | size' + 1 =>
+    let valRet:= (returnMemoryBlockNat stack (index+1) size')
+    let valRetChar := natToHexCharList valRet
+    let valChar := natToHexCharList (readMemNat stack index)
+    let natRet := hexToNatList (valRetChar ++ valChar) 0 -- A variavel com o size maior vai primeiro
+    natRet
+
+def inputMemo :=
+  let mem1 := emptyMemory
+  let mem2 := writeMem mem1 ⟨1, by decide⟩ 1  -- Escreve 42 na posição 10
+  let mem3 := writeMem mem2 ⟨2, by decide⟩ 2 -- Escreve 100 na posição 20
+  let mem4 := writeMem mem3 ⟨3, by decide⟩ 3 -- Escreve 100 na posição 20
+  let mem5 := writeMem mem4 ⟨4, by decide⟩ 4 -- Escreve 100 na posição 20
+  let mem6 := writeMem mem5 ⟨5, by decide⟩ 11 -- Escreve 100 na posição 20
+  let mem7 := writeMem mem6 ⟨6, by decide⟩ 12 -- Escreve 100 na posição 20
+  let mem8 := writeMem mem7 ⟨7, by decide⟩ 13 -- Escreve 100 na posição 20
+  let mem9 := writeMem mem8 ⟨8, by decide⟩ 14 -- Escreve 100 na posição 20
+  let mem10 := writeMem mem9 ⟨0, by decide⟩ 3 -- Escreve 100 na posição 20
+  mem10
+
+--           cc 3b bf fa 08 00 45 10
+--Val size   -  1  0
+--Val index  0  1  2   3  4  5  6  7
+
+--           3  1  2  3  4  11 12 13 14
+--Val size   -  1  0
+--Val index  0  1  2  3  4  5  6  7  8
+#eval returnMemoryBlockNat inputMemo 4 2  -- '4' '2'
+
+#eval (natToHexCharList 14)
+#eval hexToNatList ((natToHexCharList 12) ++ (natToHexCharList 11) ++ (natToHexCharList 4)) 0
+
+#eval inputMemo
 
 def returnMemoryBlock (regs : Registers) (dstReg : DestinationReg) (stack : MemorySpace) (index:Nat) (msb : Msb) : Registers :=
   match msb with
@@ -863,3 +1024,11 @@ FF:FF:FF:FF:FF:FF  11:22:33:44:55:66  08 06   00 01 08 00 ...
 -- Rodar os testes de conformidade
 
 -- Compilar codigo em c para gerar os codigos eBPF
+
+
+
+
+
+
+--Leio a entrada em Hexa -> Guardo na memoria como decimal
+--> transformo para Hexa na hora de construir a palavra -> Armazeno no registrador como natural
